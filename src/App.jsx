@@ -1,122 +1,149 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+const DEPARTMENT_ALL = "";
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+const DEPARTMENT_OPTIONS = [
+  { value: DEPARTMENT_ALL, label: "Wszystkie" },
+  { value: "IT", label: "IT" },
+  { value: "Sprzedaż", label: "Sprzedaż" },
+  { value: "Księgowość", label: "Księgowość" },
+];
 
-      <div className="ticks"></div>
+const INITIAL_EMPLOYEES = [
+  { id: 1, imie: "Anna", nazwisko: "Kowalska", dzial: "IT", pensja: 7200 },
+  { id: 2, imie: "Piotr", nazwisko: "Nowak", dzial: "Sprzedaż", pensja: 5400 },
+  { id: 3, imie: "Maria", nazwisko: "Wiśniewska", dzial: "Księgowość", pensja: 6100 },
+  { id: 4, imie: "Jan", nazwisko: "Kowalczyk", dzial: "IT", pensja: 8300 },
+  { id: 5, imie: "Katarzyna", nazwisko: "Zielińska", dzial: "Sprzedaż", pensja: 5900 },
+  { id: 6, imie: "Tomasz", nazwisko: "Szymański", dzial: "IT", pensja: 9100 },
+  { id: 7, imie: "Agnieszka", nazwisko: "Woźniak", dzial: "Księgowość", pensja: 6400 },
+  { id: 8, imie: "Michał", nazwisko: "Kaczmarek", dzial: "Sprzedaż", pensja: 5200 },
+  { id: 9, imie: "Magdalena", nazwisko: "Mazur", dzial: "IT", pensja: 7800 },
+  { id: 10, imie: "Paweł", nazwisko: "Krawczyk", dzial: "Księgowość", pensja: 6000 },
+  { id: 11, imie: "Joanna", nazwisko: "Piotrowska", dzial: "Sprzedaż", pensja: 5600 },
+  { id: 12, imie: "Łukasz", nazwisko: "Grabowski", dzial: "IT", pensja: 8700 },
+];
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+function normalizeSearchText(text) {
+  return text.trim().toLowerCase();
 }
 
-export default App
+function filterEmployees(employees, searchText, selectedDepartment) {
+  const normalizedSearch = normalizeSearchText(searchText);
+
+  return employees.filter((employee) => {
+    const matchesSurname = employee.nazwisko
+      .toLowerCase()
+      .includes(normalizedSearch);
+    const matchesDepartment =
+      selectedDepartment === DEPARTMENT_ALL ||
+      employee.dzial === selectedDepartment;
+
+    return matchesSurname && matchesDepartment;
+  });
+}
+
+function App() {
+  const [employees] = useState(INITIAL_EMPLOYEES);
+  const [searchText, setSearchText] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState(DEPARTMENT_ALL);
+
+  const visibleEmployees = filterEmployees(
+    employees,
+    searchText,
+    selectedDepartment
+  );
+
+  function handleFilterChange(nextSearchText, nextDepartment) {
+    const resultsCount = filterEmployees(
+      employees,
+      nextSearchText,
+      nextDepartment
+    ).length;
+    console.log(`Wyniki: ${resultsCount}`);
+  }
+
+  function handleSearchChange(event) {
+    const nextSearchText = event.target.value;
+    setSearchText(nextSearchText);
+    handleFilterChange(nextSearchText, selectedDepartment);
+  }
+
+  function handleDepartmentChange(event) {
+    const nextDepartment = event.target.value;
+    setSelectedDepartment(nextDepartment);
+    handleFilterChange(searchText, nextDepartment);
+  }
+
+  return (
+    <div className="container py-4">
+      <h2 className="mb-4">Pracownicy</h2>
+
+      <div className="row g-3 mb-3">
+        <div className="col-md-6">
+          <label htmlFor="searchInput" className="form-label">
+            Szukaj:
+          </label>
+          <input
+            id="searchInput"
+            type="text"
+            className="form-control"
+            value={searchText}
+            onChange={handleSearchChange}
+          />
+        </div>
+
+        <div className="col-md-6">
+          <label htmlFor="departmentSelect" className="form-label">
+            Dział:
+          </label>
+          <select
+            id="departmentSelect"
+            className="form-select"
+            value={selectedDepartment}
+            onChange={handleDepartmentChange}
+          >
+            {DEPARTMENT_OPTIONS.map((option) => (
+              <option key={option.label} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <p className="fw-semibold">Liczba pracowników: {visibleEmployees.length}</p>
+
+      {visibleEmployees.length === 0 ? (
+        <div className="alert alert-warning" role="alert">
+          Brak pracowników spełniających kryteria
+        </div>
+      ) : (
+        <div className="table-responsive">
+          <table className="table table-striped table-hover align-middle">
+            <thead className="table-dark">
+              <tr>
+                <th scope="col">Imię</th>
+                <th scope="col">Nazwisko</th>
+                <th scope="col">Dział</th>
+                <th scope="col">Pensja</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleEmployees.map((employee) => (
+                <tr key={employee.id}>
+                  <td>{employee.imie}</td>
+                  <td>{employee.nazwisko}</td>
+                  <td>{employee.dzial}</td>
+                  <td>{employee.pensja}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
